@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Banking</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* CSS for the body */
+        body {
+            background-color: #f0f5ff; /* Soft blue background color */
+            font-family: Arial, sans-serif;
+        }
+
+        /* CSS for the login form */
+        .login-form {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .login-form input {
+            width: 300px;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .login-form input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* CSS for the account details */
+        .account-details {
+            display: none;
+        }
+
+        .account-details .header {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .account-details .details {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .account-details .details p {
+            font-size: 18px;
+            margin: 5px;
+        }
+
+        .account-details .graphs {
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .graph {
+            width: 600px; /* Set width to accommodate both graphs */
+            height: 200px;
+            margin: 0 10px;
+            border: 1px solid #ccc;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .footer .logout-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        /* Add CSS for options menu */
+        .options-menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .options-menu ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .options-menu li {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .options-menu li a {
+            text-decoration: none;
+            color: #333;
+            border: 1px solid #333;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+
+        .options-menu li a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <form class="login-form" action="#" onsubmit="return login()">
+            <h2>Login to Online Banking</h2>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <input type="submit" value="Login">
+        </form>
+
+        <div class="account-details">
+            <div class="header">
+                <h1>Account Details</h1>
+            </div>
+
+            <div class="options-menu">
+                <ul>
+                    <li><a href="#" onclick="showAccountDetails()">Account Details</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+
+            <div class="details">
+                <h2>Welcome, <span id="welcome-username"></span></h2>
+                <p id="balance">Balance: $5000</p>
+                <button onclick="deposit()">Deposit</button>
+                <button onclick="withdraw()">Withdraw</button>
+                <button onclick="checkBalance()">Check Balance</button>
+            </div>
+
+            <div class="graphs">
+                <canvas class="graph" id="combined-graph">Combined Graph</canvas>
+            </div>
+
+            <div class="account-details-section" style="display: none;">
+                <h2>Additional Account Details</h2>
+                <p><strong>Card Number:</strong> 1234 5678 9012 3456</p>
+                <p><strong>Expiration Date:</strong> 12/24</p>
+                <p><strong>CCV:</strong> 123</p>
+                <p><strong>Full Name:</strong> John Doe</p>
+                <p><strong>Date of Birth:</strong> January 1, 1980</p>
+                <p><strong>Address:</strong> 123 Main Street, City, Country</p>
+                <p><strong>Email:</strong> john.doe@example.com</p>
+                <p><strong>Phone Number:</strong> +1234567890</p>
+            </div>
+
+            <div class="footer">© T0MM4S</div>
+        </div>
+    </div>
+
+    <div id="thank-you" style="display: none;">
+        <h1 style="text-align: center; margin-top: 100px;">Thank you for your visit!</h1>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function login() {
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            // Perform authentication
+            // Here you can add your authentication logic, for simplicity we'll just check if the username is not empty
+            if (username.trim() !== '') {
+                document.getElementById('welcome-username').textContent = username;
+                document.querySelector('.login-form').style.display = 'none';
+                document.querySelector('.account-details').style.display = 'block';
+                updateGraphs(); // Update graphs on login
+                return false; // Prevent form submission
+            } else {
+                alert('Please enter a valid username');
+                return false;
+            }
+        }
+
+        function logout() {
+            document.querySelector('.account-details').style.display = 'none';
+            document.getElementById('thank-you').style.display = 'block';
+            setTimeout(function () {
+                window.location.href = "thank_you.html"; // Redirect to thank you page after 3 seconds
+            }, 3000);
+        }
+
+        function deposit() {
+            var amount = parseFloat(prompt("Enter amount to deposit:"));
+            if (!isNaN(amount)) {
+                var balance = parseFloat(document.getElementById('balance').textContent.replace('Balance: $', ''));
+                balance += amount;
+                document.getElementById('balance').textContent = "Balance: $" + balance.toFixed(2);
+                updateGraphs(); // Update graphs after deposit
+            } else {
+                alert("Invalid amount");
+            }
+        }
+
+        function withdraw() {
+            var amount = parseFloat(prompt("Enter amount to withdraw:"));
+            if (!isNaN(amount)) {
+                var balance = parseFloat(document.getElementById('balance').textContent.replace('Balance: $', ''));
+                if (balance >= amount) {
+                    balance -= amount;
+                    document.getElementById('balance').textContent = "Balance: $" + balance.toFixed(2);
+                    updateGraphs(); // Update graphs after withdrawal
+                } else {
+                    alert("Insufficient balance");
+                }
+            } else {
+                alert("Invalid amount");
+            }
+        }
+
+        function checkBalance() {
+            var balance = parseFloat(document.getElementById('balance').textContent.replace('Balance: $', ''));
+            alert("Your balance is: $" + balance.toFixed(2));
+        }
+
+        function showAccountDetails() {
+            var detailsSection = document.querySelector('.account-details-section');
+            if (detailsSection.style.display === 'none') {
+                detailsSection.style.display = 'block';
+            } else {
+                detailsSection.style.display = 'none';
+            }
+        }
+
+        function updateGraphs() {
+            // Simulated data for income and expenses
+            var incomeData = [500, 600, 700, 800, 900];
+            var expenseData = [300, 400, 500, 600, 700];
+
+            // Combine income and expense data
+            var combinedData = [];
+            for (var i = 0; i < incomeData.length; i++) {
+                combinedData.push({
+                    income: incomeData[i],
+                    expense: expenseData[i]
+                });
+            }
+
+            // Update combined graph
+            var combinedGraph = document.getElementById('combined-graph').getContext('2d');
+            drawGraph(combinedGraph, combinedData);
+        }
+
+        function drawGraph(ctx, data) {
+            var labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+            var datasets = [];
+
+            for (var i = 0; i < data.length; i++) {
+                datasets.push({
+                    label: 'Income',
+                    data: [data[i].income],
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)', // Light blue color for income
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Expenses',
+                    data: [data[i].expense],
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)', // Light red color for expenses
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                });
+            }
+
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
